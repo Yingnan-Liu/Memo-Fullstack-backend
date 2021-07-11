@@ -6,6 +6,7 @@ const app = express();
 
 app.use(express.json()); //json-parser中间件
 app.use(cors()); //cors中间件
+app.use(express.static("build")); //static中间件
 
 let notes = [
   {
@@ -74,6 +75,7 @@ app.post("/api/notes", (request, response) => {
   notes = notes.concat(note);
   response.json(note);
 });
+
 //现在我们使用定义在环境变量的端口，如果环境变量 PORT 是未定义的，则使用端口3002。Heroku 会在环境变量的基础上配置应用端口
 const PORT = process.env.PORT || 3002;
 app.listen(PORT, () => {
