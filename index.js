@@ -9,17 +9,24 @@ app.use(express.static("build"));
 app.use(cors());
 app.use(express.json());
 
-const generateId = () => {
-  const maxId = notes.length > 0 ? Math.max(...notes.map((n) => n.id)) : 0;
-  return maxId + 1;
+const errorHandler = (error, request, response, next) => {
+  console.error(error.message);
+  if (error.name === "CastError" && error.kind === "ObjectId") {
+    return response.status(400).send({ error: "malformatted id" });
+  }
+  next(error);
 };
+// const generateId = () => {
+//   const maxId = notes.length > 0 ? Math.max(...notes.map((n) => n.id)) : 0;
+//   return maxId + 1;
+// };
 
 // 处理/发出的get请求
 app.get("/", (request, response) => {
   response.send("<h1>Hello World! !</h1>");
   console.log("here here");
-  console.log(PORT);
-  console.log(process.env);
+  // console.log(PORT);
+  // console.log(process.env);
 });
 
 app.get("/api/notes", (request, response) => {
@@ -28,15 +35,7 @@ app.get("/api/notes", (request, response) => {
   });
 });
 
-app.get("/api/notes/:id", (request, response) => {
-  // 此处request.params.id的值是string 但是notes中id的数据类型为number 如果不转换后面find会出错
-  // const id = Number(request.params.id);
-  // const note = notes.find((note) => note.id === id);
-  // if (note) {
-  //   response.json(note);
-  // } else {
-  //   response.status(404).end();
-  // }
+app.get("/api/notes/:id", (request, response, next) => {
   //mongoose的findById方法
   Note.findById(request.params.id)
     .then((note) => {
@@ -47,18 +46,33 @@ app.get("/api/notes/:id", (request, response) => {
       }
     })
     .catch((error) => {
-      console.log(error);
-      response.status(400).send({ error: "malformatted id" });
+      console.log("error:");
+      next(error);
     });
 });
 
-// 删除资源
-app.delete("/api/notes/:id", (request, response) => {
-  const id = Number(request.params.id);
-  notes = notes.filter((note) => note.id !== id);
-  response.status(204).end();
+// 删除资源  findByIdAndRemove mongoose方法
+app.delete("/api/notes/:id", (request, response, next) => {
+  Note.findByIdAndRemove(request.params.id)
+    .then((result) => {
+      response.status(204).end();
+    })
+    .catch((error) => next(error));
 });
+//put 更换重要性
+app.put("/api/notes/:id", (request, response, next) => {
+  const body = request.body;
+  const note = {
+    content: body.content,
+    important: body.important,
+  };
 
+  Note.findByIdAndUpdate(request.params.id, note, { new: true })
+    .then((updatedNote) => {
+      response.json(updatedNote);
+    })
+    .catch((error) => next(error));
+});
 //post请求
 app.post("/api/notes", (request, response) => {
   const body = request.body;
@@ -76,6 +90,8 @@ app.post("/api/notes", (request, response) => {
     response.json(savedNote);
   });
 });
+
+app.use(errorHandler);
 
 const PORT = process.env.PORT;
 app.listen(PORT, () => {
