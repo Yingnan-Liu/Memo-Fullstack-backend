@@ -6,6 +6,16 @@ POST  http://localhost:3002/api/notes
 Content-Type: application/json
 
 {
-    "content": "go to bed",
+    "content": "user root test",
+    "important": true,
+    "userId":"60eba828fc323441d875cb11"
+}
+###
+POST http://localhost:3002/api/notes
+Content-Type: application/json
+Authorization: bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VybmFtZSI6InJvb3QiLCJpZCI6IjYwZWJhODI4ZmMzMjM0NDFkODc1Y2IxMSIsImlhdCI6MTYyNjA1OTI2NH0.wXkv9EzflbsVYj7lCnnbaxp63eGdN3gLAd2Crw-VXJ0
+
+{
+    "content": "This note used token",
     "important": true
 }
