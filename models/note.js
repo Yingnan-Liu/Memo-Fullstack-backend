@@ -1,10 +1,11 @@
+//schema定义和
 const mongoose = require("mongoose");
 
 const noteSchema = new mongoose.Schema({
   content: {
     type: String,
     required: true,
-    minlength: 5,
+    minlength: 1,
   },
   date: {
     type: Date,

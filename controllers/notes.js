@@ -23,6 +23,7 @@ notesRouter.get("/:id", (request, response, next) => {
 
 const getTokenFrom = (request) => {
   const authorization = request.get("authorization");
+  // console.log(authorization);
   if (authorization && authorization.toLowerCase().startsWith("bearer ")) {
     return authorization.substring(7);
   }
@@ -47,6 +48,8 @@ notesRouter.post("/", async (request, response, next) => {
   const savedNote = await note.save();
   user.notes = user.notes.concat(savedNote._id);
   await user.save();
+
+  response.json(savedNote.toJSON());
 });
 
 notesRouter.delete("/:id", (request, response, next) => {
@@ -55,6 +58,7 @@ notesRouter.delete("/:id", (request, response, next) => {
       response.status(204).end();
     })
     .catch((error) => next(error));
+  // 如果在没有参数的情况下调用 next，那么执行将简单地转移到下一个路由或中间件上。 如果使用参数调用next 函数，那么执行将继续到error 处理程序中间件。
 });
 
 notesRouter.put("/:id", (request, response, next) => {
